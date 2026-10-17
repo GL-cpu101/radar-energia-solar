@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://GL-cpu101.github.io/radar-energia-solar/sitemap.xml
