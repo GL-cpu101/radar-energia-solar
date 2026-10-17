@@ -1,0 +1,32 @@
+name: Motor Autonomo Energia y Solar
+
+on:
+  schedule:
+    - cron: '35 6,19 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ejecutar_energia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Ejecutar Motor de Energia
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+        run: python motor_luz.py
+      - name: Guardar JSON, CSV y Sitemap
+        run: |
+          git config --global user.name "Robot Energia"
+          git config --global user.email "actions@github.com"
+          git add datos/ sitemap.xml robots.txt
+          git diff --staged --quiet || git commit -m "Actualizacion diaria precios kWh"
+          git push
