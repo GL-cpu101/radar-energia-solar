@@ -10,7 +10,7 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHANNEL = os.environ.get("TELEGRAM_CHANNEL", "").strip()
 
 # Pon aquí tu enlace de Gumroad o de afiliado energético
-ENLACE_AFILIADO_LUZ = "https://gumroad.com"
+ENLACE_AFILIADO_LUZ = "https://radardatos.gumroad.com/l/fbuims"
 TEXTO_GANCHO = (
     "⚡ Calcula cuánto ahorrarías con Batería Virtual Solar y optimización de"
     " potencia aquí"
