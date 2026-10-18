@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radar Energía y Solar España: Precio kWh Hoy, Excedentes y Calculadora de Potencia</title>
+  <meta name="description" content="Consulta las horas más baratas de luz hoy en España, el diagnóstico IA de excedentes solares y calcula cuánto dinero pierdes en potencia contratada P1/P2 y batería virtual.">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --primary: #0f172a;
+      --accent: #0284c7;
+      --green: #16a34a;
+      --red: #dc2626;
+      --text: #334155;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    header { background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; padding: 2.5rem 1rem; text-align: center; }
+    header h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    header p { color: #94a3b8; max-width: 680px; margin: 0 auto; font-size: 0.95rem; }
+    .container { max-width: 920px; margin: -1.5rem auto 3rem; padding: 0 1rem; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; }
+    .kpi-label { font-size: 0.75rem; text-transform: uppercase; color: var(--muted); font-weight: 700; letter-spacing: 0.05em; }
+    .kpi-val { font-size: 1.6rem; font-weight: 800; margin: 0.35rem 0; }
+    .kpi-sub { font-size: 0.85rem; color: var(--muted); }
+    .ai-box { background: #f0f9ff; border-left: 4px solid var(--accent); padding: 1.25rem; border-radius: 8px; margin-bottom: 2rem; }
+    .ai-box h3 { font-size: 1rem; color: var(--primary); margin-bottom: 0.4rem; }
+    .calc-card { background: var(--card); border: 2px solid #cbd5e1; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+    .calc-card h2 { font-size: 1.3rem; color: var(--primary); margin-bottom: 0.5rem; }
+    .calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+    .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--primary); }
+    .input-group input { width: 100%; padding: 0.65rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
+    .result-banner { background: #0f172a; color: #fff; border-radius: 10px; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; align-items: center; justify-content: space-between; }
+    @media(min-width: 640px) { .result-banner { flex-direction: row; } }
+    .btn-cta { background: #38bdf8; color: #0f172a; font-weight: 800; text-decoration: none; padding: 0.85rem 1.4rem; border-radius: 8px; white-space: nowrap; text-align: center; }
+    .btn-cta:hover { background: #7dd3fc; }
+    .hours-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.6rem; margin-top: 1rem; }
+    .hour-pill { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem; text-align: center; font-size: 0.85rem; }
+    .hour-cheap { border-color: #86efac; background: #f0fdf4; }
+    footer { text-align: center; padding: 2rem 1rem; font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>⚡ Radar Oficial de Precio kWh, Excedentes Solares y Potencia</h1>
+    <p>Monitor autónomo diario del mercado eléctrico español (OMIE / 2.0TD) y simulador matemático de ahorro en Batería Virtual y término de potencia.</p>
+  </header>
+
+  <div class="container">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">📉 Hora Más Barata Hoy</div>
+        <div class="kpi-val" id="horaMin" style="color: var(--green);">--:--</div>
+        <div class="kpi-sub" id="precioMin">Cargando €/kWh...</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">⚖️ Precio Medio del Día</div>
+        <div class="kpi-val" id="precioMedio" style="color: var(--accent);">--</div>
+        <div class="kpi-sub" id="fechaHoy">Actualización diaria</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">📈 Hora Pico Más Cara</div>
+        <div class="kpi-val" id="horaMax" style="color: var(--red);">--:--</div>
+        <div class="kpi-sub" id="precioMax">Evitar consumo</div>
+      </div>
+    </div>
+
+    <div class="ai-box">
+      <h3>🧠 Diagnóstico Técnico del Día (Generado por IA):</h3>
+      <p id="consejoIa">Cargando análisis diario de optimización de cargas y excedentes fotovoltaicos...</p>
+    </div>
+
+    <div class="calc-card">
+      <h2>🧮 Calculadora de Pérdida por Excedentes Solares y Potencia (P1/P2)</h2>
+      <p style="font-size: 0.9rem; color: var(--muted);">Introduce tus datos aproximados para calcular cuánto dinero estás perdiendo al año sin Batería Virtual y por exceso de potencia en hora punta.</p>
+      
+      <div class="calc-grid">
+        <div class="input-group">
+          <label>Excedente solar vertido al mes (kWh)</label>
+          <input type="number" id="inputExcedente" value="180" min="0" step="10">
+        </div>
+        <div class="input-group">
+          <label>Potencia contratada actual P1 (kW)</label>
+          <input type="number" id="inputPotActual" value="5.75" min="1" step="0.5">
+        </div>
+        <div class="input-group">
+          <label>Potencia real necesaria en P1 (kW)</label>
+          <input type="number" id="inputPotOptima" value="3.45" min="1" step="0.5">
+        </div>
+      </div>
+
+      <div class="result-banner">
+        <div>
+          <div style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase;">Ahorro anual estimado desbloqueable:</div>
+          <div style="font-size: 1.75rem; font-weight: 800; color: #4ade80;" id="ahorroTotal">182,40 € / año</div>
+          <div style="font-size: 0.8rem; color: #cbd5e1;" id="desgloseAhorro">Incluye compensación en Batería Virtual + ajuste de peaje P1 CNMC.</div>
+        </div>
+        <!-- PEGA AQUÍ DEBAJO TU ENLACE DE GUMROAD EN LUGAR DE https://gumroad.com -->
+        <a href="https://radardatos.gumroad.com/l/fbuims" id="ctaAfiliado" class="btn-cta" target="_blank" rel="noopener">Descargar Base Viva y Calculadora &rarr;</a>
+      </div>
+    </div>
+
+    <h3 style="color: var(--primary); margin-bottom: 0.5rem;">🕒 Tabla de Precios Horarios de Hoy (€/kWh)</h3>
+    <p style="font-size: 0.85rem; color: var(--muted);">Las franjas marcadas en verde indican las ventanas óptimas para programar termo eléctrico, recarga de vehículo eléctrico o baterías.</p>
+    <div class="hours-grid" id="gridHoras"></div>
+  </div>
+
+  <footer>
+    <p>Aviso legal: Las simulaciones se basan en precios públicos oficiales del mercado eléctrico (OMIE / Peajes CNMC 2.0TD) y tienen carácter meramente informativo. No constituye asesoramiento contractual vinculante.</p>
+  </footer>
+
+  <script>
+    let precioMedioActual = 0.14;
+
+    function calcularAhorro() {
+      const exc = parseFloat(document.getElementById('inputExcedente').value) || 0;
+      const potAct = parseFloat(document.getElementById('inputPotActual').value) || 0;
+      const potOpt = parseFloat(document.getElementById('inputPotOptima').value) || 0;
+      const difSolar = Math.max(0.05, precioMedioActual - 0.04);
+      const ahorroSolarAnual = exc * 12 * difSolar;
+      const ahorroPotenciaAnual = Math.max(0, (potAct - potOpt) * 32.50);
+      const total = (ahorroSolarAnual + ahorroPotenciaAnual).toFixed(2);
+      document.getElementById('ahorroTotal').textContent = `${total} € / año`;
+      document.getElementById('desgloseAhorro').textContent = 
+        `${ahorroSolarAnual.toFixed(0)}€/año por Batería Virtual + ${ahorroPotenciaAnual.toFixed(0)}€/año ajustando término de potencia.`;
+    }
+
+    ['inputExcedente', 'inputPotActual', 'inputPotOptima'].forEach(id => {
+      document.getElementById(id).addEventListener('input', calcularAhorro);
+    });
+
+    fetch('datos/precios_luz_domotica.json')
+      .then(r => r.json())
+      .then(data => {
+        const res = data.resumen_dia;
+        precioMedioActual = parseFloat(res.precio_medio) || 0.14;
+        document.getElementById('horaMin').textContent = res.hora_min;
+        document.getElementById('precioMin').textContent = `${res.precio_min} €/kWh`;
+        document.getElementById('precioMedio').textContent = `${res.precio_medio} €/kWh`;
+        document.getElementById('fechaHoy').textContent = `Fecha: ${res.fecha}`;
+        document.getElementById('horaMax').textContent = res.hora_max;
+        document.getElementById('precioMax').textContent = `${res.precio_max} €/kWh`;
+        document.getElementById('consejoIa').textContent = res.consejo_ia;
+
+        const grid = document.getElementById('gridHoras');
+        grid.innerHTML = '';
+        (data.precios_24h || []).forEach(h => {
+          const div = document.createElement('div');
+          div.className = 'hour-pill' + (h.es_barato ? ' hour-cheap' : '');
+          div.innerHTML = `<strong>${h.hora}h</strong><br>${h.precio_kwh} €/kWh`;
+          grid.appendChild(div);
+        });
+        calcularAhorro();
+      })
+      .catch(() => calcularAhorro());
+  </script>
+</body>
+</html>
